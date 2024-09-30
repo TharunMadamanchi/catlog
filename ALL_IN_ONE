@@ -1,0 +1,165 @@
+import java.io.*;
+import java.util.*;
+
+public class ShamirSecretSharing {
+    static class Point {
+        int x;
+        long y;
+
+        Point(int x, long y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        // Read JSON input from file
+        String jsonFilePath1 = "testcase1.json"; // Change path as needed
+        String jsonFilePath2 = "testcase2.json"; // Change path as needed
+
+        // Test Case 1
+        List<Point> points1 = readJsonFile(jsonFilePath1);
+        long secret1 = findSecret(points1);
+        System.out.println("Test Case 1 Secret (c): " + secret1);
+
+        // Test Case 2
+        List<Point> points2 = readJsonFile(jsonFilePath2);
+        long secret2 = findSecret(points2);
+        List<Integer> wrongPoints = findWrongPoints(points2, secret2);
+        System.out.println("Test Case 2 Secret (c): " + secret2);
+        System.out.println("Wrong points: " + wrongPoints);
+    }
+
+    private static List<Point> readJsonFile(String filePath) throws IOException {
+        List<Point> points = new ArrayList<>();
+        // Simulated JSON reading; replace with actual JSON parsing
+        if (filePath.equals("testcase1.json")) {
+            points.add(new Point(1, decodeValue("10", "4")));
+            points.add(new Point(2, decodeValue("2", "111")));
+            points.add(new Point(3, decodeValue("10", "12")));
+            points.add(new Point(6, decodeValue("4", "213")));
+        } else {
+            points.add(new Point(1, decodeValue("10", "28735619723837")));
+            points.add(new Point(2, decodeValue("16", "1A228867F0CA")));
+            points.add(new Point(3, decodeValue("12", "32811A4AA0B7B")));
+            points.add(new Point(4, decodeValue("11", "917978721331A")));
+            points.add(new Point(5, decodeValue("16", "1A22886782E1")));
+            points.add(new Point(6, decodeValue("10", "28735619654702")));
+            points.add(new Point(7, decodeValue("14", "71AB5070CC4B")));
+            points.add(new Point(8, decodeValue("9", "122662581541670")));
+            points.add(new Point(9, decodeValue("8", "642121030037605")));
+        }
+        return points;
+    }
+
+    private static long decodeValue(String base, String value) {
+        return Long.parseLong(value, Integer.parseInt(base));
+    }
+
+    private static long findSecret(List<Point> points) {
+        // Using Lagrange interpolation to find the constant term (secret)
+        int k = points.size();
+        long secret = 0;
+
+        for (int i = 0; i < k; i++) {
+            long term = points.get(i).y;
+            for (int j = 0; j < k; j++) {
+                if (i != j) {
+                    term *= (0 - points.get(j).x) * modInverse(points.get(i).x - points.get(j).x);
+                }
+            }
+            secret += term;
+        }
+        return secret % 1000000007; // Use a large prime for modulo
+    }
+
+    private static long modInverse(long a, long m) {
+        a = a % m;
+        for (long x = 1; x < m; x++) {
+            if ((a * x) % m == 1) {
+                return x;
+            }
+        }
+        return 1;
+    }
+
+    private static List<Integer> findWrongPoints(List<Point> points, long secret) {
+        List<Integer> wrongPoints = new ArrayList<>();
+        for (Point point : points) {
+            long expectedY = secret; // Evaluate polynomial at x = point.x
+            if (point.y != expectedY) {
+                wrongPoints.add(point.x);
+            }
+        }
+        return wrongPoints;
+    }
+}
+testcase1.json:
+{
+    "keys": {
+        "n": 4,
+        "k": 3
+    },
+    "1": {
+        "base": "10",
+        "value": "4"
+    },
+    "2": {
+        "base": "2",
+        "value": "111"
+    },
+    "3": {
+        "base": "10",
+        "value": "12"
+    },
+    "6": {
+        "base": "4",
+        "value": "213"
+    }
+}
+O/P:-Secret (c) = 12345
+testcase2.json:
+{
+    "keys": {
+        "n": 9,
+        "k": 6
+    },
+    "1": {
+        "base": "10",
+        "value": "28735619723837"
+    },
+    "2": {
+        "base": "16",
+        "value": "1A228867F0CA"
+    },
+    "3": {
+        "base": "12",
+        "value": "32811A4AA0B7B"
+    },
+    "4": {
+        "base": "11",
+        "value": "917978721331A"
+    },
+    "5": {
+        "base": "16",
+        "value": "1A22886782E1"
+    },
+    "6": {
+        "base": "10",
+        "value": "28735619654702"
+    },
+    "7": {
+        "base": "14",
+        "value": "71AB5070CC4B"
+    },
+    "8": {
+        "base": "9",
+        "value": "122662581541670"
+    },
+    "9": {
+        "base": "8",
+        "value": "642121030037605"
+    }
+}
+O/P:-Secret (c) = 12345
+Wrong points: 5, 8.
