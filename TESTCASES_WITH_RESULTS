@@ -23,7 +23,8 @@ json
         "value": "213"
     }
 }
-OUTPUT:-Secret (c): 12345{
+OUTPUT:-Secret (c): 12345
+{
     "keys": {
         "n": 9,
         "k": 6
